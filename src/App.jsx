@@ -76,34 +76,35 @@ function App() {
   // Form State
   const [fromLocation, setFromLocation] = useState('');
   const [toLocation, setToLocation] = useState('');
-  const [searchNotification, setSearchNotification] = useState(null);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (!fromLocation || !toLocation) return;
-    setSearchNotification(`Route query initialized: ${fromLocation} ➔ ${toLocation}`);
   };
 
   // Scroll Popup Observer Hook
   const featuresRef = useRef(null);
+  const metricsRef = useRef(null);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('popup-visible');
+          } else {
+            entry.target.classList.remove('popup-visible');
           }
         });
       },
       { threshold: 0.15 }
     );
 
-    if (featuresRef.current) {
-      observer.observe(featuresRef.current);
-    }
+    if (featuresRef.current) observer.observe(featuresRef.current);
+    if (metricsRef.current) observer.observe(metricsRef.current);
 
     return () => {
       if (featuresRef.current) observer.unobserve(featuresRef.current);
+      if (metricsRef.current) observer.unobserve(metricsRef.current);
     };
   }, []);
 
@@ -125,8 +126,18 @@ function App() {
             <a href="#tracking" className="nav-item">Live Tracking</a>
             <a href="#help" className="nav-item">Help & Support</a>
           </div>
+
           <div className="nav-actions">
+            {/* Sign In Button */}
             <button className="login-btn">Sign In / Register</button>
+
+            {/* Shifted User Profile Avatar Icon */}
+            <button className="bw-profile-avatar-btn right-corner-profile" title="User Profile">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </button>
           </div>
         </div>
       </nav>
@@ -180,19 +191,19 @@ function App() {
               <div className="action-tabs-container">
                 <button 
                   className={`tab-fold-btn ${activeAction === 'bookSeat' ? 'active' : ''}`}
-                  onClick={() => { setActiveAction('bookSeat'); setSearchNotification(null); }}
+                  onClick={() => setActiveAction('bookSeat')}
                 >
                   Book Seat
                 </button>
                 <button 
                   className={`tab-fold-btn ${activeAction === 'parcelSend' ? 'active' : ''}`}
-                  onClick={() => { setActiveAction('parcelSend'); setSearchNotification(null); }}
+                  onClick={() => setActiveAction('parcelSend')}
                 >
                   Parcel Send
                 </button>
                 <button 
                   className={`tab-fold-btn ${activeAction === 'parcelReceive' ? 'active' : ''}`}
-                  onClick={() => { setActiveAction('parcelReceive'); setSearchNotification(null); }}
+                  onClick={() => setActiveAction('parcelReceive')}
                 >
                   Parcel Receive
                 </button>
@@ -366,16 +377,10 @@ function App() {
             </div>
           </div>
 
-          {searchNotification && (
-            <div className="clean-search-feedback">
-              <p>ℹ️ {searchNotification}</p>
-            </div>
-          )}
-
         </div>
       </section>
 
-      {/* 3 Features Section with Scroll Popup Animation and Updated Smart Parcel Safety Title */}
+      {/* 3 Features Section */}
       <section className="features-section scroll-popup-section" ref={featuresRef}>
         <div className="features-container">
           <div className="feature-card popup-card">
@@ -392,6 +397,41 @@ function App() {
             <div className="feature-icon-box">03</div>
             <h3>AI Regional Voice Support</h3>
             <p>Book seats and query schedules seamlessly in local languages through automated AI voice response.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* AESTHETIC HIGHLIGHTS SECTION */}
+      <section className="metrics-banner-section scroll-popup-section" ref={metricsRef}>
+        <div className="metrics-container">
+          <div className="neon-ambient-glow"></div>
+          
+          <div className="metrics-header">
+            <h2 className="enhanced-heading">Why Travelers Choose MyBus</h2>
+            <p>Designed for speed, transparency, and effortless regional connectivity</p>
+          </div>
+
+          <div className="metrics-grid">
+            <div className="metric-card popup-card interactive-perk-card">
+              <div className="card-ambient-orb"></div>
+              <div className="metric-number">100+ Buses</div>
+              <div className="metric-label">Active Fleet Network</div>
+              <div className="metric-desc">Well-maintained regional coaches ready for your journey</div>
+            </div>
+
+            <div className="metric-card popup-card interactive-perk-card">
+              <div className="card-ambient-orb"></div>
+              <div className="metric-number">Live Seats</div>
+              <div className="metric-label">Real-Time Availability</div>
+              <div className="metric-desc">Instant check on window and aisle preferences</div>
+            </div>
+
+            <div className="metric-card popup-card interactive-perk-card">
+              <div className="card-ambient-orb"></div>
+              <div className="metric-number">Multi-Hop</div>
+              <div className="metric-label">Smart Connecting Routes</div>
+              <div className="metric-desc">Find the fastest paths even when direct buses are rare</div>
+            </div>
           </div>
         </div>
       </section>

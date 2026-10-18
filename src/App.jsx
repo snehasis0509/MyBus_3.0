@@ -29,6 +29,7 @@ function App() {
   const [isManualExpanded, setIsManualExpanded] = useState(false);
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
   const [activeAction, setActiveAction] = useState('bookSeat');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Independent Sliders
   const [leftSlideIndex, setLeftSlideIndex] = useState(0);
@@ -120,6 +121,7 @@ function App() {
             <span className="logo-text">My<span className="logo-highlight">Bus</span></span>
           </div>
 
+          {/* Desktop Nav Links */}
           <div className="nav-links">
             <a href="#bus" className="nav-item active">Bus Tickets</a>
             <a href="#parcel" className="nav-item">Express Parcel</a>
@@ -131,15 +133,40 @@ function App() {
             {/* Sign In Button */}
             <button className="login-btn">Sign In / Register</button>
 
-            {/* Shifted User Profile Avatar Icon */}
+            {/* Profile Avatar Icon */}
             <button className="bw-profile-avatar-btn right-corner-profile" title="User Profile">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </button>
+
+            {/* Mobile Hamburger Toggle Button */}
+            <button 
+              className="mobile-hamburger-btn"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle Navigation"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                {mobileMenuOpen ? (
+                  <path d="M18 6L6 18M6 6l12 12" />
+                ) : (
+                  <path d="M3 12h18M3 6h18M3 18h18" />
+                )}
+              </svg>
+            </button>
           </div>
         </div>
+
+        {/* Mobile Slide-down Drawer Menu */}
+        {mobileMenuOpen && (
+          <div className="mobile-drawer-menu">
+            <a href="#bus" className="mobile-nav-item" onClick={() => setMobileMenuOpen(false)}>Bus Tickets</a>
+            <a href="#parcel" className="mobile-nav-item" onClick={() => setMobileMenuOpen(false)}>Express Parcel</a>
+            <a href="#tracking" className="mobile-nav-item" onClick={() => setMobileMenuOpen(false)}>Live Tracking</a>
+            <a href="#help" className="mobile-nav-item" onClick={() => setMobileMenuOpen(false)}>Help & Support</a>
+          </div>
+        )}
       </nav>
 
       {/* 2. Hero Section */}

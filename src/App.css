@@ -934,3 +934,40 @@ html, body, #root, .app-container {
   transform: scale(1.06);
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.25);
 }
+/* --- Responsive Design for Tablets and Mobile Phones --- */
+
+/* Tablets (Max Width: 1024px) */
+@media screen and (max-width: 1024px) {
+  .nav-container {
+    padding: 0 16px !important;
+  }
+  .nav-links {
+    gap: 20px !important;
+    margin-left: 20px !important;
+  }
+  .dual-carousel-wrapper {
+    grid-template-columns: 1fr;
+  }
+  .features-container, .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile Phones (Max Width: 768px) */
+@media screen and (max-width: 768px) {
+  .navbar .nav-links {
+    display: none !important; /* Mobile mein main links hide ho jayengi (hamburger menu ke liye baad mein set kar sakte hain) */
+  }
+  .hero-title {
+    font-size: 28px !important;
+  }
+  .hero-subtitle {
+    font-size: 14px !important;
+  }
+  .search-inputs-row {
+    grid-template-columns: 1fr !important;
+  }
+  .metrics-container {
+    padding: 30px 20px !important;
+  }
+}

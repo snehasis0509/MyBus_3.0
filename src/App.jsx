@@ -29,12 +29,104 @@ function App() {
   const [isManualExpanded, setIsManualExpanded] = useState(false);
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
   const [activeAction, setActiveAction] = useState('bookSeat');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Independent Sliders
+  // Sliders State
   const [leftSlideIndex, setLeftSlideIndex] = useState(0);
   const [rightSlideIndex, setRightSlideIndex] = useState(0);
 
+  // Auth Modal State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState('register');
+
+  // Form Fields State
+  const [fullName, setFullName] = useState('');
+  const [emailAddress, setEmailAddress] = useState(''); // NEW MANDATORY EMAIL FIELD
+  const [ageCategory, setAgeCategory] = useState('18+');
+  const [exactAge, setExactAge] = useState('');
+  
+  // Mobile Verification State
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [isMobileOtpSent, setIsMobileOtpSent] = useState(false);
+  const [mobileOtp, setMobileOtp] = useState('');
+  const [isMobileVerified, setIsMobileVerified] = useState(false);
+  const [mobileTimer, setMobileTimer] = useState(30);
+
+  // Aadhaar Verification State
+  const [aadhaarNumber, setAadhaarNumber] = useState('');
+  const [isAadhaarOtpSent, setIsAadhaarOtpSent] = useState(false);
+  const [aadhaarOtp, setAadhaarOtp] = useState('');
+  const [isAadhaarVerified, setIsAadhaarVerified] = useState(false);
+  const [aadhaarTimer, setAadhaarTimer] = useState(30);
+
+  // Form Error & Permission
+  const [formError, setFormError] = useState('');
+  const [autoFillPermission, setAutoFillPermission] = useState(false);
+
+  // Reset Modal Fields Function
+  const handleCloseModal = () => {
+    setIsAuthModalOpen(false);
+    setFullName('');
+    setEmailAddress('');
+    setAgeCategory('18+');
+    setExactAge('');
+    setMobileNumber('');
+    setIsMobileOtpSent(false);
+    setMobileOtp('');
+    setIsMobileVerified(false);
+    setMobileTimer(30);
+    setAadhaarNumber('');
+    setIsAadhaarOtpSent(false);
+    setAadhaarOtp('');
+    setIsAadhaarVerified(false);
+    setAadhaarTimer(30);
+    setFormError('');
+  };
+
+  // Scroll Popup Observer Hook
+  const featuresRef = useRef(null);
+  const metricsRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('popup-visible');
+          } else {
+            entry.target.classList.remove('popup-visible');
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+
+    if (featuresRef.current) observer.observe(featuresRef.current);
+    if (metricsRef.current) observer.observe(metricsRef.current);
+
+    return () => {
+      if (featuresRef.current) observer.unobserve(featuresRef.current);
+      if (metricsRef.current) observer.unobserve(metricsRef.current);
+    };
+  }, []);
+
+  // Timers Effect
+  useEffect(() => {
+    let timer;
+    if (isMobileOtpSent && mobileTimer > 0 && !isMobileVerified) {
+      timer = setInterval(() => setMobileTimer((prev) => prev - 1), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isMobileOtpSent, mobileTimer, isMobileVerified]);
+
+  useEffect(() => {
+    let timer;
+    if (isAadhaarOtpSent && aadhaarTimer > 0 && !isAadhaarVerified) {
+      timer = setInterval(() => setAadhaarTimer((prev) => prev - 1), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isAadhaarOtpSent, aadhaarTimer, isAadhaarVerified]);
+
+  // Sliders Effect
   useEffect(() => {
     const leftTimer = setInterval(() => {
       setLeftSlideIndex((prev) => (prev + 1) % leftSliderData.length);
@@ -74,40 +166,82 @@ function App() {
     else if (dateMode === 'manual' && !selectedDate) setSelectedDate(todayStr);
   }, [dateMode]);
 
-  // Form State
-  const [fromLocation, setFromLocation] = useState('');
-  const [toLocation, setToLocation] = useState('');
-
-  const handleSearch = (e) => {
-    e.preventDefault();
+  // Handlers for OTP
+  const handleSendMobileOtp = () => {
+    if (!mobileNumber || mobileNumber.length < 10) {
+      setFormError('Please enter a valid 10-digit Mobile Number');
+      return;
+    }
+    setFormError('');
+    setIsMobileOtpSent(true);
+    setMobileTimer(30);
   };
 
-  // Scroll Popup Observer Hook
-  const featuresRef = useRef(null);
-  const metricsRef = useRef(null);
+  const handleVerifyMobileOtp = () => {
+    if (mobileOtp.length >= 4) {
+      setIsMobileVerified(true);
+      setFormError('');
+    } else {
+      setFormError('Please enter valid Mobile OTP');
+    }
+  };
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('popup-visible');
-          } else {
-            entry.target.classList.remove('popup-visible');
-          }
-        });
-      },
-      { threshold: 0.15 }
-    );
+  const handleSendAadhaarOtp = () => {
+    if (!aadhaarNumber || aadhaarNumber.length < 12) {
+      setFormError('Please enter a valid 12-digit Aadhaar Number');
+      return;
+    }
+    setFormError('');
+    setIsAadhaarOtpSent(true);
+    setAadhaarTimer(30);
+  };
 
-    if (featuresRef.current) observer.observe(featuresRef.current);
-    if (metricsRef.current) observer.observe(metricsRef.current);
+  const handleVerifyAadhaarOtp = () => {
+    if (aadhaarOtp.length >= 4) {
+      setIsAadhaarVerified(true);
+      setFormError('');
+    } else {
+      setFormError('Please enter valid Aadhaar OTP');
+    }
+  };
 
-    return () => {
-      if (featuresRef.current) observer.unobserve(featuresRef.current);
-      if (metricsRef.current) observer.unobserve(metricsRef.current);
-    };
-  }, []);
+  const handleAuthSubmit = (e) => {
+    e.preventDefault();
+
+    if (authMode === 'register') {
+      if (!fullName.trim()) {
+        setFormError('Name is required!');
+        return;
+      }
+      if (!emailAddress.trim()) {
+        setFormError('Email Address is required!');
+        return;
+      }
+      if (ageCategory === 'below18' && !exactAge) {
+        setFormError('Please specify your age!');
+        return;
+      }
+      if (!isMobileVerified && !isAadhaarVerified) {
+        setFormError('Please verify your Mobile Number and Aadhaar!');
+        return;
+      }
+      if (!isMobileVerified) {
+        setFormError('Please verify your Mobile Number!');
+        return;
+      }
+      if (!isAadhaarVerified) {
+        setFormError('Please verify your Aadhaar!');
+        return;
+      }
+    } else {
+      if (!isMobileVerified) {
+        setFormError('Please verify your Mobile Number to Login!');
+        return;
+      }
+    }
+
+    handleCloseModal();
+  };
 
   const currentLeftSlide = leftSliderData[leftSlideIndex];
   const currentRightSlide = rightSliderData[rightSlideIndex];
@@ -121,7 +255,6 @@ function App() {
             <span className="logo-text">My<span className="logo-highlight">Bus</span></span>
           </div>
 
-          {/* Desktop Nav Links */}
           <div className="nav-links">
             <a href="#bus" className="nav-item active">Bus Tickets</a>
             <a href="#parcel" className="nav-item">Express Parcel</a>
@@ -130,43 +263,18 @@ function App() {
           </div>
 
           <div className="nav-actions">
-            {/* Sign In Button */}
-            <button className="login-btn">Sign In / Register</button>
+            <button className="login-btn" onClick={() => setIsAuthModalOpen(true)}>
+              Login/Register
+            </button>
 
-            {/* Profile Avatar Icon */}
-            <button className="bw-profile-avatar-btn right-corner-profile" title="User Profile">
+            <button className="bw-profile-avatar-btn right-corner-profile" title="User Profile" onClick={() => setIsAuthModalOpen(true)}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </button>
-
-            {/* Mobile Hamburger Toggle Button */}
-            <button 
-              className="mobile-hamburger-btn"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle Navigation"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                {mobileMenuOpen ? (
-                  <path d="M18 6L6 18M6 6l12 12" />
-                ) : (
-                  <path d="M3 12h18M3 6h18M3 18h18" />
-                )}
-              </svg>
-            </button>
           </div>
         </div>
-
-        {/* Mobile Slide-down Drawer Menu */}
-        {mobileMenuOpen && (
-          <div className="mobile-drawer-menu">
-            <a href="#bus" className="mobile-nav-item" onClick={() => setMobileMenuOpen(false)}>Bus Tickets</a>
-            <a href="#parcel" className="mobile-nav-item" onClick={() => setMobileMenuOpen(false)}>Express Parcel</a>
-            <a href="#tracking" className="mobile-nav-item" onClick={() => setMobileMenuOpen(false)}>Live Tracking</a>
-            <a href="#help" className="mobile-nav-item" onClick={() => setMobileMenuOpen(false)}>Help & Support</a>
-          </div>
-        )}
       </nav>
 
       {/* 2. Hero Section */}
@@ -175,7 +283,7 @@ function App() {
           <h1 className="hero-title">Smart Journey with Smart Delivery</h1>
           <p className="hero-subtitle">Experience seamless regional transit, multi-hop routing, and secure parcel management.</p>
 
-          {/* Image Sliders */}
+          {/* Dual Carousel */}
           <div className="dual-carousel-wrapper">
             <div className="banner-card-box">
               <button className="card-arrow left-card-arrow" onClick={handlePrevLeftSlide}>‹</button>
@@ -196,12 +304,9 @@ function App() {
             </div>
           </div>
 
-          {/* User Manual Header Bar */}
+          {/* User Manual Bar */}
           <div className="manual-toggle-bar">
-            <button 
-              className="user-manual-main-btn"
-              onClick={() => setIsManualExpanded(!isManualExpanded)}
-            >
+            <button className="user-manual-main-btn" onClick={() => setIsManualExpanded(!isManualExpanded)}>
               User Manual & Quick Actions
               <span className={`circle-arrow-icon ${isManualExpanded ? 'open' : ''}`}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -216,198 +321,113 @@ function App() {
             <div className="paper-fold-content">
               
               <div className="action-tabs-container">
-                <button 
-                  className={`tab-fold-btn ${activeAction === 'bookSeat' ? 'active' : ''}`}
-                  onClick={() => setActiveAction('bookSeat')}
-                >
-                  Book Seat
-                </button>
-                <button 
-                  className={`tab-fold-btn ${activeAction === 'parcelSend' ? 'active' : ''}`}
-                  onClick={() => setActiveAction('parcelSend')}
-                >
-                  Parcel Send
-                </button>
-                <button 
-                  className={`tab-fold-btn ${activeAction === 'parcelReceive' ? 'active' : ''}`}
-                  onClick={() => setActiveAction('parcelReceive')}
-                >
-                  Parcel Receive
-                </button>
+                <button className={`tab-fold-btn ${activeAction === 'bookSeat' ? 'active' : ''}`} onClick={() => setActiveAction('bookSeat')}>Book Seat</button>
+                <button className={`tab-fold-btn ${activeAction === 'parcelSend' ? 'active' : ''}`} onClick={() => setActiveAction('parcelSend')}>Parcel Send</button>
+                <button className={`tab-fold-btn ${activeAction === 'parcelReceive' ? 'active' : ''}`} onClick={() => setActiveAction('parcelReceive')}>Parcel Receive</button>
               </div>
 
-              {/* BOOK SEAT DASHBOARD */}
+              {/* 1. BOOK SEAT DASHBOARD */}
               {activeAction === 'bookSeat' && (
                 <div className="search-card-wrapper">
                   <div className="search-form-header"><h2>Book Your Bus Seat</h2></div>
-                  <form onSubmit={handleSearch} className="search-form-wrapper-box">
+                  <form onSubmit={(e) => e.preventDefault()} className="search-form-wrapper-box">
                     <div className="search-inputs-row">
                       <div className="input-group">
                         <label>FROM</label>
-                        <input 
-                          type="text" 
-                          placeholder="Departure Station" 
-                          value={fromLocation}
-                          onChange={(e) => setFromLocation(e.target.value)}
-                          required 
-                        />
+                        <input type="text" placeholder="Departure Station" required />
                       </div>
                       <div className="input-group">
                         <label>TO</label>
-                        <input 
-                          type="text" 
-                          placeholder="Destination Station" 
-                          value={toLocation}
-                          onChange={(e) => setToLocation(e.target.value)}
-                          required 
-                        />
+                        <input type="text" placeholder="Destination Station" required />
                       </div>
-
-                      {/* Date Selection */}
                       <div className="input-group date-selection-group">
                         <label>DATE SELECTION</label>
                         <div className="date-blue-menu-wrapper">
-                          <button 
-                            type="button"
-                            className="blue-date-toggle-btn"
-                            onClick={() => setIsDateDropdownOpen(!isDateDropdownOpen)}
-                          >
+                          <button type="button" className="blue-date-toggle-btn" onClick={() => setIsDateDropdownOpen(!isDateDropdownOpen)}>
                             📅 {dateMode === 'today' ? 'Today' : dateMode === 'yesterday' ? 'Yesterday' : 'Manual Select'} ▾
                           </button>
-
                           {isDateDropdownOpen && (
                             <div className="blue-date-dropdown-menu">
-                              <button 
-                                type="button" 
-                                className={`dropdown-item ${dateMode === 'today' ? 'active' : ''}`}
-                                onClick={() => { setDateMode('today'); setIsDateDropdownOpen(false); }}
-                              >
-                                Today
-                              </button>
-                              <button 
-                                type="button" 
-                                className={`dropdown-item ${dateMode === 'yesterday' ? 'active' : ''}`}
-                                onClick={() => { setDateMode('yesterday'); setIsDateDropdownOpen(false); }}
-                              >
-                                Yesterday
-                              </button>
-                              <button 
-                                type="button" 
-                                className={`dropdown-item ${dateMode === 'manual' ? 'active' : ''}`}
-                                onClick={() => { setDateMode('manual'); setIsDateDropdownOpen(false); }}
-                              >
-                                Manual Select (Max 5 Days)
-                              </button>
+                              <button type="button" className="dropdown-item" onClick={() => { setDateMode('today'); setIsDateDropdownOpen(false); }}>Today</button>
+                              <button type="button" className="dropdown-item" onClick={() => { setDateMode('yesterday'); setIsDateDropdownOpen(false); }}>Yesterday</button>
+                              <button type="button" className="dropdown-item" onClick={() => { setDateMode('manual'); setIsDateDropdownOpen(false); }}>Manual Select (Max 5 Days)</button>
                             </div>
                           )}
                         </div>
-
-                        {dateMode === 'manual' && (
-                          <input 
-                            type="date" 
-                            value={selectedDate}
-                            min={todayStr}
-                            max={maxDateStr}
-                            onChange={(e) => setSelectedDate(e.target.value)}
-                            required 
-                            className="date-input-field"
-                          />
-                        )}
+                        {dateMode === 'manual' && <input type="date" value={selectedDate} min={todayStr} max={maxDateStr} onChange={(e) => setSelectedDate(e.target.value)} className="date-input-field" />}
                       </div>
-
                       <button type="submit" className="search-submit-btn">SEARCH BUSES</button>
                     </div>
                   </form>
                 </div>
               )}
 
-              {/* PARCEL SEND DASHBOARD */}
+              {/* 2. PARCEL SEND DASHBOARD */}
               {activeAction === 'parcelSend' && (
                 <div className="search-card-wrapper">
                   <div className="search-form-header"><h2>Send Parcel Verification</h2></div>
-                  <form className="search-form-wrapper-box" onSubmit={(e) => e.preventDefault()}>
+                  <form onSubmit={(e) => e.preventDefault()} className="search-form-wrapper-box">
                     <div className="search-inputs-row">
-                      <div className="input-group"><label>PICKUP LOCATION</label><input type="text" placeholder="Sender Area / Stand" /></div>
-                      <div className="input-group"><label>DROP LOCATION</label><input type="text" placeholder="Receiver Destination" /></div>
-                      
+                      <div className="input-group">
+                        <label>PICKUP LOCATION</label>
+                        <input type="text" placeholder="Sender Area / Bus Stand" required />
+                      </div>
+                      <div className="input-group">
+                        <label>DROP LOCATION</label>
+                        <input type="text" placeholder="Receiver Destination" required />
+                      </div>
                       <div className="input-group date-selection-group">
                         <label>DISPATCH DATE</label>
                         <div className="date-blue-menu-wrapper">
-                          <button 
-                            type="button"
-                            className="blue-date-toggle-btn"
-                            onClick={() => setIsDateDropdownOpen(!isDateDropdownOpen)}
-                          >
+                          <button type="button" className="blue-date-toggle-btn" onClick={() => setIsDateDropdownOpen(!isDateDropdownOpen)}>
                             📅 {dateMode === 'today' ? 'Today' : dateMode === 'yesterday' ? 'Yesterday' : 'Manual Select'} ▾
                           </button>
-
                           {isDateDropdownOpen && (
                             <div className="blue-date-dropdown-menu">
-                              <button 
-                                type="button" 
-                                className={`dropdown-item ${dateMode === 'today' ? 'active' : ''}`}
-                                onClick={() => { setDateMode('today'); setIsDateDropdownOpen(false); }}
-                              >
-                                Today
-                              </button>
-                              <button 
-                                type="button" 
-                                className={`dropdown-item ${dateMode === 'yesterday' ? 'active' : ''}`}
-                                onClick={() => { setDateMode('yesterday'); setIsDateDropdownOpen(false); }}
-                              >
-                                Yesterday
-                              </button>
-                              <button 
-                                type="button" 
-                                className={`dropdown-item ${dateMode === 'manual' ? 'active' : ''}`}
-                                onClick={() => { setDateMode('manual'); setIsDateDropdownOpen(false); }}
-                              >
-                                Manual Select (Max 5 Days)
-                              </button>
+                              <button type="button" className="dropdown-item" onClick={() => { setDateMode('today'); setIsDateDropdownOpen(false); }}>Today</button>
+                              <button type="button" className="dropdown-item" onClick={() => { setDateMode('yesterday'); setIsDateDropdownOpen(false); }}>Yesterday</button>
+                              <button type="button" className="dropdown-item" onClick={() => { setDateMode('manual'); setIsDateDropdownOpen(false); }}>Manual Select (Max 5 Days)</button>
                             </div>
                           )}
                         </div>
-
-                        {dateMode === 'manual' && (
-                          <input 
-                            type="date" 
-                            value={selectedDate}
-                            min={todayStr}
-                            max={maxDateStr}
-                            onChange={(e) => setSelectedDate(e.target.value)}
-                            className="date-input-field"
-                          />
-                        )}
+                        {dateMode === 'manual' && <input type="date" value={selectedDate} min={todayStr} max={maxDateStr} onChange={(e) => setSelectedDate(e.target.value)} className="date-input-field" />}
                       </div>
-
-                      <button className="search-submit-btn parcel-btn">GENERATE PARCEL OTP</button>
+                      <button type="submit" className="search-submit-btn parcel-btn">GENERATE PARCEL OTP</button>
                     </div>
                   </form>
                 </div>
               )}
 
-              {/* PARCEL RECEIVE DASHBOARD */}
+              {/* 3. PARCEL RECEIVE DASHBOARD */}
               {activeAction === 'parcelReceive' && (
                 <div className="search-card-wrapper">
                   <div className="search-form-header"><h2>Receive Parcel Verification</h2></div>
-                  <div className="search-form-wrapper-box">
+                  <form onSubmit={(e) => e.preventDefault()} className="search-form-wrapper-box">
                     <div className="search-inputs-row">
-                      <div className="input-group"><label>TRACKING ID</label><input type="text" placeholder="Enter Tracking Code" /></div>
-                      <div className="input-group"><label>RECEIVER OTP</label><input type="text" placeholder="Enter 4-digit OTP" /></div>
-                      <div className="input-group"><label>CONFIRM PHONE</label><input type="tel" placeholder="Mobile Number" /></div>
-                      <button className="search-submit-btn parcel-btn">VERIFY & COLLECT</button>
+                      <div className="input-group">
+                        <label>TRACKING ID</label>
+                        <input type="text" placeholder="Enter Tracking Code" required />
+                      </div>
+                      <div className="input-group">
+                        <label>RECEIVER OTP</label>
+                        <input type="text" placeholder="Enter 4-digit OTP" required />
+                      </div>
+                      <div className="input-group">
+                        <label>CONFIRM PHONE</label>
+                        <input type="tel" placeholder="Mobile Number" required />
+                      </div>
+                      <button type="submit" className="search-submit-btn parcel-btn">VERIFY & COLLECT</button>
                     </div>
-                  </div>
+                  </form>
                 </div>
               )}
 
             </div>
           </div>
-
         </div>
       </section>
 
-      {/* 3 Features Section */}
+      {/* 3. FEATURE CARDS SECTION */}
       <section className="features-section scroll-popup-section" ref={featuresRef}>
         <div className="features-container">
           <div className="feature-card popup-card">
@@ -417,7 +437,7 @@ function App() {
           </div>
           <div className="feature-card popup-card">
             <div className="feature-icon-box">02</div>
-            <h3>Smart Parcel Safety</h3>
+            <h3>Dual OTP Parcel Safety</h3>
             <p>Complete end-to-end security with automated WhatsApp alerts and verification codes for receiver pickup.</p>
           </div>
           <div className="feature-card popup-card">
@@ -428,7 +448,7 @@ function App() {
         </div>
       </section>
 
-      {/* AESTHETIC HIGHLIGHTS SECTION */}
+      {/* 4. METRICS & HIGHLIGHTS SECTION */}
       <section className="metrics-banner-section scroll-popup-section" ref={metricsRef}>
         <div className="metrics-container">
           <div className="neon-ambient-glow"></div>
@@ -462,6 +482,202 @@ function App() {
           </div>
         </div>
       </section>
+
+      {/* 5. LOGIN / REGISTER MODAL DASHBOARD OVERLAY */}
+      {isAuthModalOpen && (
+        <div className="modal-overlay-backdrop" onClick={handleCloseModal}>
+          <div className="auth-modal-card" onClick={(e) => e.stopPropagation()}>
+            {/* Close Button */}
+            <button className="close-modal-btn" onClick={handleCloseModal} title="Close Modal">✕</button>
+
+            <div className="auth-modal-header">
+              <h2>{authMode === 'register' ? 'Register Your MyBus Account' : 'Log in to manage your bookings'}</h2>
+              <p>{authMode === 'register' ? 'Enter your details to create an account' : 'Verify your details to proceed'}</p>
+            </div>
+
+            {formError && <div className="form-error-banner">{formError}</div>}
+
+            <form onSubmit={handleAuthSubmit} className="auth-form-body">
+              {authMode === 'register' && (
+                <>
+                  {/* Name Field */}
+                  <div className="auth-input-block">
+                    <label>Name <span className="req-star">*</span></label>
+                    <input 
+                      type="text" 
+                      placeholder="Enter full name" 
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {/* Mandatory Email Address Field */}
+                  <div className="auth-input-block">
+                    <label>Email Address <span className="req-star">*</span></label>
+                    <input 
+                      type="email" 
+                      placeholder="example@domain.com" 
+                      value={emailAddress}
+                      onChange={(e) => setEmailAddress(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {/* Age Field */}
+                  <div className="auth-input-block">
+                    <label>Age Option <span className="req-star">*</span></label>
+                    <div className="age-toggle-row">
+                      <button 
+                        type="button" 
+                        className={`age-choice-btn ${ageCategory === '18+' ? 'active' : ''}`}
+                        onClick={() => setAgeCategory('18+')}
+                      >
+                        18+
+                      </button>
+                      <button 
+                        type="button" 
+                        className={`age-choice-btn ${ageCategory === 'below18' ? 'active' : ''}`}
+                        onClick={() => setAgeCategory('below18')}
+                      >
+                        Below 18
+                      </button>
+                    </div>
+
+                    {ageCategory === 'below18' && (
+                      <div className="sub-input-box">
+                        <label>Enter Age <span className="req-star">*</span></label>
+                        <input 
+                          type="number" 
+                          placeholder="e.g. 16" 
+                          value={exactAge} 
+                          onChange={(e) => setExactAge(e.target.value)}
+                          required
+                        />
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Mobile Number Field */}
+              <div className="auth-input-block">
+                <label>Mobile Number <span className="req-star">*</span></label>
+                <div className="input-verify-row">
+                  <input 
+                    type="tel" 
+                    placeholder="Enter 10-digit mobile" 
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    disabled={isMobileVerified}
+                    required
+                  />
+                  {!isMobileVerified ? (
+                    <button type="button" className="verify-switch-btn" onClick={handleSendMobileOtp}>
+                      {isMobileOtpSent ? 'Resend' : 'Verify'}
+                    </button>
+                  ) : (
+                    <span className="verified-badge">✓ Verified</span>
+                  )}
+                </div>
+
+                {isMobileOtpSent && !isMobileVerified && (
+                  <div className="otp-expanded-card">
+                    <label>Enter 4-Digit Mobile OTP</label>
+                    <div className="otp-inputs-wrapper">
+                      <input 
+                        type="text" 
+                        maxLength="4" 
+                        placeholder="OTP"
+                        value={mobileOtp}
+                        onChange={(e) => setMobileOtp(e.target.value)}
+                      />
+                      <button type="button" className="otp-submit-btn" onClick={handleVerifyMobileOtp}>Submit OTP</button>
+                    </div>
+                    
+                    <div className="otp-timer-row">
+                      {mobileTimer > 0 ? (
+                        <span>Didn't receive OTP? Retry in 00:{mobileTimer < 10 ? `0${mobileTimer}` : mobileTimer}</span>
+                      ) : (
+                        <button type="button" className="link-btn" onClick={handleSendMobileOtp}>Send Again</button>
+                      )}
+                    </div>
+
+                    <label className="permission-checkbox-label">
+                      <input 
+                        type="checkbox" 
+                        checked={autoFillPermission} 
+                        onChange={(e) => setAutoFillPermission(e.target.checked)} 
+                      />
+                      Allow auto-fill OTP from SMS
+                    </label>
+                  </div>
+                )}
+              </div>
+
+              {/* Aadhaar Number Field */}
+              {authMode === 'register' && (
+                <div className="auth-input-block">
+                  <label>Aadhaar Number <span className="req-star">*</span></label>
+                  <div className="input-verify-row">
+                    <input 
+                      type="text" 
+                      placeholder="Enter 12-digit Aadhaar" 
+                      value={aadhaarNumber}
+                      onChange={(e) => setAadhaarNumber(e.target.value)}
+                      disabled={isAadhaarVerified}
+                      required
+                    />
+                    {!isAadhaarVerified ? (
+                      <button type="button" className="verify-switch-btn" onClick={handleSendAadhaarOtp}>
+                        {isAadhaarOtpSent ? 'Resend' : 'Verify'}
+                      </button>
+                    ) : (
+                      <span className="verified-badge">✓ Verified</span>
+                    )}
+                  </div>
+
+                  {isAadhaarOtpSent && !isAadhaarVerified && (
+                    <div className="otp-expanded-card">
+                      <label>Enter Aadhaar OTP</label>
+                      <div className="otp-inputs-wrapper">
+                        <input 
+                          type="text" 
+                          maxLength="6" 
+                          placeholder="Aadhaar OTP"
+                          value={aadhaarOtp}
+                          onChange={(e) => setAadhaarOtp(e.target.value)}
+                        />
+                        <button type="button" className="otp-submit-btn" onClick={handleVerifyAadhaarOtp}>Submit OTP</button>
+                      </div>
+
+                      <div className="otp-timer-row">
+                        {aadhaarTimer > 0 ? (
+                          <span>Didn't receive OTP? Retry in 00:{aadhaarTimer < 10 ? `0${aadhaarTimer}` : aadhaarTimer}</span>
+                        ) : (
+                          <button type="button" className="link-btn" onClick={handleSendAadhaarOtp}>Send Again</button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <button type="submit" className="auth-main-submit-btn">
+                {authMode === 'register' ? 'Register Account' : 'Log in'}
+              </button>
+            </form>
+
+            <div className="auth-footer-toggle">
+              {authMode === 'register' ? (
+                <p>Already have an account? <button type="button" className="link-btn" onClick={() => { setAuthMode('login'); setFormError(''); }}>Log in</button></p>
+              ) : (
+                <p>Don't have an account? <button type="button" className="link-btn" onClick={() => { setAuthMode('register'); setFormError(''); }}>Sign up</button></p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

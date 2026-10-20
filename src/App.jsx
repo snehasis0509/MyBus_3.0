@@ -34,13 +34,13 @@ function App() {
   const [leftSlideIndex, setLeftSlideIndex] = useState(0);
   const [rightSlideIndex, setRightSlideIndex] = useState(0);
 
-  // Auth Modal State
+  // Auth Modal State - Default set to 'login'
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState('register');
+  const [authMode, setAuthMode] = useState('login');
 
   // Form Fields State
   const [fullName, setFullName] = useState('');
-  const [emailAddress, setEmailAddress] = useState(''); // NEW MANDATORY EMAIL FIELD
+  const [emailAddress, setEmailAddress] = useState('');
   const [ageCategory, setAgeCategory] = useState('18+');
   const [exactAge, setExactAge] = useState('');
   
@@ -65,6 +65,7 @@ function App() {
   // Reset Modal Fields Function
   const handleCloseModal = () => {
     setIsAuthModalOpen(false);
+    setAuthMode('login');
     setFullName('');
     setEmailAddress('');
     setAgeCategory('18+');
@@ -491,8 +492,8 @@ function App() {
             <button className="close-modal-btn" onClick={handleCloseModal} title="Close Modal">✕</button>
 
             <div className="auth-modal-header">
-              <h2>{authMode === 'register' ? 'Register Your MyBus Account' : 'Log in to manage your bookings'}</h2>
-              <p>{authMode === 'register' ? 'Enter your details to create an account' : 'Verify your details to proceed'}</p>
+              <h2>{authMode === 'login' ? 'Log in to manage your bookings' : 'Register Your MyBus Account'}</h2>
+              <p>{authMode === 'login' ? 'Verify your details to proceed' : 'Enter your details to create an account'}</p>
             </div>
 
             {formError && <div className="form-error-banner">{formError}</div>}
@@ -615,7 +616,7 @@ function App() {
                 )}
               </div>
 
-              {/* Aadhaar Number Field */}
+              {/* Aadhaar Number Field (Register view only) */}
               {authMode === 'register' && (
                 <div className="auth-input-block">
                   <label>Aadhaar Number <span className="req-star">*</span></label>
@@ -664,15 +665,15 @@ function App() {
               )}
 
               <button type="submit" className="auth-main-submit-btn">
-                {authMode === 'register' ? 'Register Account' : 'Log in'}
+                {authMode === 'login' ? 'Log in' : 'Register Account'}
               </button>
             </form>
 
             <div className="auth-footer-toggle">
-              {authMode === 'register' ? (
-                <p>Already have an account? <button type="button" className="link-btn" onClick={() => { setAuthMode('login'); setFormError(''); }}>Log in</button></p>
-              ) : (
+              {authMode === 'login' ? (
                 <p>Don't have an account? <button type="button" className="link-btn" onClick={() => { setAuthMode('register'); setFormError(''); }}>Sign up</button></p>
+              ) : (
+                <p>Already have an account? <button type="button" className="link-btn" onClick={() => { setAuthMode('login'); setFormError(''); }}>Log in</button></p>
               )}
             </div>
           </div>

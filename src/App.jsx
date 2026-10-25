@@ -2,11 +2,12 @@
 import './App.css';
 
 // 8 Dedicated Photos for Left Side (Bus Transit & Journey)
+ // 8 Dedicated Photos for Left Side (Bus Transit & Journey) - Updated Stable Links
+ // 8 Dedicated Photos for Left Side (Bus Transit & Journey)
 const leftSliderData = [
   { title: "Smart Bus Transit", img: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&auto=format&fit=crop&q=80" },
   { title: "Multi-Hop Connected Routes", img: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=800&auto=format&fit=crop&q=80" },
   { title: "Intercity Fleet Service", img: "https://images.unsplash.com/photo-1557223562-6c77ef16210f?w=800&auto=format&fit=crop&q=80" },
-  { title: "Live GPS Tracked Coaches", img: "https://images.unsplash.com/photo-1517649763962-0c623266010b?w=800&auto=format&fit=crop&q=80" },
   { title: "Highway Express Transit", img: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800&auto=format&fit=crop&q=80" },
   { title: "Regional Terminal Station", img: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=800&auto=format&fit=crop&q=80" },
   { title: "Passenger Comfort Seating", img: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=800&auto=format&fit=crop&q=80" },
